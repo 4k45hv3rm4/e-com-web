@@ -1,118 +1,129 @@
 <template>
-  <v-app dark>
-    <v-navigation-drawer
-      v-model="drawer"
-      :mini-variant="miniVariant"
-      :clipped="clipped"
-      fixed
-      app
-    >
-      <v-list>
-        <v-list-item
-          v-for="(item, i) in items"
-          :key="i"
-          :to="item.to"
-          router
-          exact
-        >
-          <v-list-item-action>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.title" />
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
-    <v-app-bar
-      :clipped-left="clipped"
-      fixed
-      app
-    >
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-btn
-        icon
-        @click.stop="miniVariant = !miniVariant"
-      >
-        <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
-      </v-btn>
-      <v-btn
-        icon
-        @click.stop="clipped = !clipped"
-      >
-        <v-icon>mdi-application</v-icon>
-      </v-btn>
-      <v-btn
-        icon
-        @click.stop="fixed = !fixed"
-      >
-        <v-icon>mdi-minus</v-icon>
-      </v-btn>
-      <v-toolbar-title v-text="title" />
-      <v-spacer />
-      <v-btn
-        icon
-        @click.stop="rightDrawer = !rightDrawer"
-      >
-        <v-icon>mdi-menu</v-icon>
-      </v-btn>
+  <v-app>
+    <v-app-bar fixed app elevate-on-scroll>
+      <snackbar></snackbar>
+      <login-form :login_data="login_data" v-if="login_data.flag"></login-form>
+      <strong class="logo" @click="goToHome">E-COM</strong>
+      <v-spacer></v-spacer>
+      <div v-if="!isAuthenticated()">
+        <strong class="auth-cta" @click="Login()">Login</strong>
+        <strong class="auth-cta" @click="Signup()"> Signup</strong>
+      </div>
+      <div v-else>
+        <strong class="auth-cta" @click="goToOrders">My Orders</strong>
+        <v-btn @click="Logout()" color="orange lighten-2">Logout</v-btn>
+        <v-btn color="pink" height="40" class="auth-cta" @click="goToCart">
+          Cart
+        </v-btn>
+      </div>
     </v-app-bar>
+
     <v-main>
       <v-container>
         <Nuxt />
       </v-container>
     </v-main>
-    <v-navigation-drawer
-      v-model="rightDrawer"
-      :right="right"
-      temporary
-      fixed
-    >
-      <v-list>
-        <v-list-item @click.native="right = !right">
-          <v-list-item-action>
-            <v-icon light>
-              mdi-repeat
-            </v-icon>
-          </v-list-item-action>
-          <v-list-item-title>Switch drawer (click me)</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
-    <v-footer
-      :absolute="!fixed"
-      app
-    >
-      <span>&copy; {{ new Date().getFullYear() }}</span>
-    </v-footer>
   </v-app>
 </template>
 
 <script>
+import Vue from "vue";
+import global from "../mixins.js/global";
+import LoginForm from "../components/AuthDialog/LoginForm.vue";
+import snackbar from "../components/snackBar/snackbar.vue";
+import { mapActions } from "vuex";
+import getAccessToken from "../app-js/methods";
+
+Vue.mixin(global);
+
 export default {
-  name: 'DefaultLayout',
-  data () {
+  name: "DefaultLayout",
+  mixins: [global],
+  components: {
+    "login-form": LoginForm,
+    snackbar,
+  },
+  data() {
     return {
       clipped: false,
-      drawer: false,
-      fixed: false,
-      items: [
-        {
-          icon: 'mdi-apps',
-          title: 'Welcome',
-          to: '/'
-        },
-        {
-          icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire'
-        }
-      ],
+      login_data: {
+        flag: false,
+      },
+      drawer: null,
+      items: [],
       miniVariant: false,
       right: true,
       rightDrawer: false,
-      title: 'Vuetify.js'
+    };
+  },
+
+  methods: {
+    ...mapActions("cart", ["getCartDetails"]),
+    goToCart() {
+      this.$router.push("/cart");
+    },
+    Logout() {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+
+      this.$router.go("/");
+    },
+    goToOrders() {
+      this.$router.push("/orders");
+    },
+    goToHome() {
+      this.$router.push("/");
+    },
+    Login() {
+      this.login_data.flag = true;
+      this.login_data.type = "Login";
+    },
+    Signup() {
+      this.login_data.flag = true;
+      this.login_data.type = "Signup";
+    },
+    isAuthenticated() {
+      return getAccessToken();
+    },
+  },
+  mounted() {
+    if (this.isAuthenticated) {
+      this.getCartDetails();
     }
-  }
-}
+  },
+};
 </script>
+
+
+<style lang="scss" scoped>
+@import url("https://fonts.googleapis.com/css2?family=Quicksand&display=swap");
+*,
+#public-section {
+  font-family: "Quicksand", sans-serif;
+}
+.auth-cta {
+  margin: 5px;
+  color: #fff;
+  background-color: rgb(104, 177, 177);
+  padding: 10px;
+  border-radius: 10%;
+  cursor: pointer;
+}
+.logo {
+  font-weight: 800;
+  color: rgb(255, 160, 36);
+}
+.list {
+  border-bottom: 1px solid #333;
+}
+.total_div {
+  margin: 10px;
+}
+.button {
+  background-color: rgb(104, 177, 177) !important;
+  color: #fff;
+  letter-spacing: 0px;
+  text-transform: capitalize;
+  width: 50%;
+}
+</style>
