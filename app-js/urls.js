@@ -1,5 +1,5 @@
 const URLS = {
-    BASE_URL: 'http://localhost:8000', 
+    BASE_URL: 'https://ecom-pro-live.herokuapp.com', 
     LOGIN: 'api/token/', 
     SIGNUP: 'api/user/register',
     PRODUCT_LIST: 'api/product/get/list', 
