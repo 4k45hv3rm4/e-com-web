@@ -1,23 +1,33 @@
 <template>
   <div>
     <h2>Available Products</h2>
-    <div class="products-container">
-      <ProductCard
-        @addToCart="add"
-        class="d-flex"
-        v-for="(item, index) in products"
-        :product_data="item"
-        :key="index"
-      />
+    <div v-if="products.length">
+      <div class="products-container">
+        <ProductCard
+          @addToCart="add"
+          class="d-flex"
+          v-for="(item, index) in products"
+          :product_data="item"
+          :key="index"
+        />
+      </div>
+      <div class="mt-7"></div>
+      <v-pagination
+        v-model="page"
+        color="red lighten-2 "
+        @input="getProductList"
+        class="elevation-0 pagination"
+        :length="numPages"
+      ></v-pagination>
     </div>
-    <div class="mt-7"></div>
-    <v-pagination
-      v-model="page"
-      color="red lighten-2 "
-      @input="getProductList"
-      class="elevation-0 pagination"
-      :length="numPages"
-    ></v-pagination>
+    <div v-else class="text-center">
+      <v-progress-circular
+        :width="5"
+        size="50"
+        color="red lighten-2"
+        indeterminate
+      ></v-progress-circular>
+    </div>
   </div>
 </template>
 

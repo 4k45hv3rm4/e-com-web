@@ -15,7 +15,6 @@ const getters = {
 const actions = {
   async getCartDetails({commit}) {
     const successHandler = res => {
-      console.log (res, 'PRODUCTS');
       commit ('SET_CART_ITEMS', res.data.product);
     };
     const errorHandler = err => {
@@ -29,7 +28,6 @@ const actions = {
         Authorization: `Bearer ${getAccessToken ()}`,
       },
     };
-    console.log (config, 'CONFIG');
     try {
       const res = await axios.get (`${urls.CART_DETAILS}`, config);
       successHandler (res);
@@ -37,11 +35,12 @@ const actions = {
       errorHandler (error);
     }
   },
-  async removeFromCart ({commit}, product_id) {
+  async removeFromCart ({dispatch, commit}, product_id) {
     console.log (product_id, 'PROD ID');
     const successHandler = res => {
       console.log (res, 'PRODUCTS');
       commit ('REMOVE_ITEM_FROM_CART', product_id);
+      dispatch('snackBar/showSnack', {text: 'Item Removed from Cart', color: 'success', timeout:500}, {root:true})
     };
     const errorHandler = err => {
       console.log (err);
@@ -52,11 +51,10 @@ const actions = {
         Authorization: `Bearer ${getAccessToken ()}`,
       },
     };
-    console.log (config, 'CONFIG');
     let data = {product_id: product_id};
     try {
       const res = await axios.put(`${urls.REMOVE_FROM_CART}`, data, config);
-      console.log(res, 'RES FROM REMOVE')
+    
       if(res.status===200){
       successHandler (res)}
     } catch (error) {
@@ -65,8 +63,11 @@ const actions = {
   },
 
   addToCart ({commit}, payload) {
-    console.log (payload, 'PAYLOAD INSIDE cart.js');
+    
     commit ('ADD_ITEM_TO_CART', payload);
+    dispatch('snackBar/showSnack', {text: 'Item Added to Cart', color: 'success', timeout:500}, {root:true})
+
+    
   },
 
   emptyCart({commit}) {
@@ -77,15 +78,11 @@ const actions = {
 const mutations = {
   SET_CART_ITEMS: (state, payload) => {
     state.cartItems = payload;
-    console.log (state.cartItems, 'STATE');
   },
   ADD_ITEM_TO_CART: (state, payload) => {
-    console.log (payload, 'PAYLOPAD INSIDE MUTATIONS');
     state.cartItems.push (payload);
-    console.log (state.cartItems, 'CART ITEM');
   },
   REMOVE_ITEM_FROM_CART: (state, payload) => {
-    console.log(payload, 'REOV')
     let item= state.cartItems.findIndex(object => {
       return object.id === payload;
     });

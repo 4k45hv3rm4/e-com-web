@@ -1,12 +1,9 @@
 <template>
   <div>
     <v-card class="mx-auto" max-width="344">
-      <v-img
-        :src="product_data.image"
-        class="image"
-        height="200"
-        width="344"
-      ></v-img>
+      <div class="image-div">
+        <v-img :src="product_data.image" class="image"></v-img>
+      </div>
 
       <v-card-title class="pa-2"> {{ product_data.title }} </v-card-title>
 
@@ -54,6 +51,12 @@ export default {
 
 <style scoped>
 .image {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+}
+.image-div {
+  width: 300px;
+  height: 300px;
 }
 </style>
